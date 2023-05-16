@@ -7,6 +7,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    favorte = db.relationship('Favorite')
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -83,3 +84,11 @@ class Planets(db.Model):
             "surface_water": self.surface_water
             # do not serialize the password, its a security breach
         }
+
+class Favorite(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
+    people_id = db.Column(db.Integer, db.ForeignKey('people.id'), nullable = False)
+    planet_id = db.Column(db.Integer, db.ForeignKey('planet.id'), nullable = False)
+    people = db.relationship('People')
+    planet = db.relationship('Planet')
