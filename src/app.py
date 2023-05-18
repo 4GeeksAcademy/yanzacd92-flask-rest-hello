@@ -73,7 +73,7 @@ def favorite_create(element, element_id):
     new_favorite = Favorite(type=element, element_id=element_id, user_id=user_id)
     db.session.add(new_favorite)
     db.session.commit()
-    return jsonify({"msg": "Favorite created"}, 201)
+    return jsonify({"msg": "Favorite created"}), 201
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
