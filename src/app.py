@@ -45,6 +45,14 @@ def handle_hello():
 
     return jsonify(response_body), 200
 
+@app.route('/user', methods=['POST'])
+def user_create():
+    data = request.get_json()
+    new_user = User(email=data["email"], password=data["password"], is_active=True)
+    db.session.add(new_user)
+    db.session.commit()
+    return "ok"
+
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))

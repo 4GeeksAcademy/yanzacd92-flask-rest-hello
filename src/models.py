@@ -3,14 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class User(db.Model):
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
-    favorte = db.relationship('Favorite')
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r>' % self.email
 
     def serialize(self):
         return {
@@ -20,6 +20,7 @@ class User(db.Model):
         }
 
 class People(db.Model):
+    __tablename__ = 'people'
     id = db.Column(db.Integer, primary_key=True)
     birth_year = db.Column(db.String(50))
     eye_color = db.Column(db.String(50))
@@ -52,6 +53,7 @@ class People(db.Model):
         }
 
 class Planets(db.Model):
+    __tablename__ = 'planets'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
     diameter = db.Column(db.Float)
@@ -62,7 +64,7 @@ class Planets(db.Model):
     climate = db.Column(db.String(50))
     terrain = db.Column(db.String(50))
     surface_water = db.Column(db.Integer)
-    residents_id = db.Column(db.Integer, db.ForeignKey('people.id'))
+    #residents_id = db.Column(db.Integer, db.ForeignKey('people.id'))
     url = db.Column(db.String(250))
     created = db.Column(db.DateTime)
     edited = db.Column(db.DateTime)
@@ -86,9 +88,13 @@ class Planets(db.Model):
         }
 
 class Favorite(db.Model):
+    __tablename__ = 'favorites'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
-    people_id = db.Column(db.Integer, db.ForeignKey('people.id'), nullable = False)
-    planet_id = db.Column(db.Integer, db.ForeignKey('planet.id'), nullable = False)
-    people = db.relationship('People')
-    planet = db.relationship('Planet')
+    type = db.Column(db.String(20), nullable=False)
+    element_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
+    #people_id = db.Column(db.Integer, db.ForeignKey('people.id'), nullable = False)
+    #planet_id = db.Column(db.Integer, db.ForeignKey('planets.id'), nullable = False)
+    user = db.relationship(User)
+    #people = db.relationship(People)
+    #planet = db.relationship(Planets)
