@@ -48,11 +48,22 @@ def handle_hello():
 @app.route('/user', methods=['POST'])
 def user_create():
     data = request.get_json()
+    new_user = User.query.filter_by(email=data["email"]).first()
+    if(new_user is not None):
+        return jsonify({
+            "msg": "Email registrado"
+        }), 400
     new_user = User(email=data["email"], password=data["password"], is_active=True)
     db.session.add(new_user)
     db.session.commit()
     return "ok"
 
+@app.route('/user/<int:user_id>', methods=['GET'])
+def user_get(user_id):
+    user = User.query.get(user_id)
+    if(user is None):
+        return "User not found"
+    return jsonify(user.serialize())
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
