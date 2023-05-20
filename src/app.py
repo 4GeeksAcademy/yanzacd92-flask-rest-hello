@@ -87,6 +87,16 @@ def people_get():
     people = list(map(lambda p : p.serialize(), people))
     return jsonify(people)
 
+@app.route('/favorite/>string:element>/<int:element_id>', methods=['DELETE'])
+def favorite_planet_delete(element, element_id):
+    user_id = request.get_json()["userId"]
+    favorite = Favorite.query.filter_by(type=element, element_id=element_id, user_id=user_id).first()
+    if(favorite is None):
+        return jsonify({"msg": "favorite not found"}), 404
+    db.session.delete(favorite)
+    db.session.commit()
+    return jsonify({"msg": "Favorite deleted"}), 200
+
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
