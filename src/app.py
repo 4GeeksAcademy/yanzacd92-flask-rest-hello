@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Favorite, People
+from models import db, User, Favorite, People, Planets
 #from models import Person
 
 app = Flask(__name__)
@@ -37,13 +37,56 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/user', methods=['GET'])
-def handle_hello():
+def user_get():
+    user = User.query.all()
+    user = list(map(lambda u : u.serialize(), user))
+    return jsonify(user)
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+@app.route('/people', methods=['GET'])
+def people_get():
+    people = People.query.all()
+    people = list(map(lambda p : p.serialize(), people))
+    return jsonify(people)
 
-    return jsonify(response_body), 200
+@app.route('/planets', methods=['GET'])
+def planets_get():
+    planets = Planets.query.all()
+    planets = list(map(lambda p : p.serialize(), planets))
+    return jsonify(planets)
+
+@app.route('/user/<int:user_id>/favorites', methods=['GET'])
+def user_favorites_get(user_id):
+    favorite_query = Favorite.query.filter_by(user_id = user_id)
+    favorite_list = list(lambda fav : fav.serialize(), favorite_query)
+    return jsonify(favorite_list)
+
+@app.route('/user/<int:user_id>', methods=['GET'])
+def user_get(user_id):
+    user = User.query.get(user_id)
+    if(user is None):
+        return jsonify({
+            "msg": "User not found"
+        }), 404
+    return jsonify(user.serialize())
+
+@app.route('/people/<int:people_id>', methods=['GET'])
+def people_get(people_id):
+    person = People.query.get(people_id)
+    if(person is None):
+        return jsonify({
+            "msg": "Person not found"
+        }), 404
+    return jsonify(person.serialize())
+
+@app.route('/planets/<int:planet_id>', methods=['GET'])
+def planets_get(planet_id):
+    planet = Planets.query.get(planet_id)
+    if(planet is None):
+        return jsonify({
+            "msg": "Planet not found"
+        }), 404
+    return jsonify(planet.serialize())
+
 
 @app.route('/user', methods=['POST'])
 def user_create():
@@ -58,21 +101,6 @@ def user_create():
     db.session.commit()
     return "ok"
 
-@app.route('/user/<int:user_id>', methods=['GET'])
-def user_get(user_id):
-    user = User.query.get(user_id)
-    if(user is None):
-        return jsonify({
-            "msg": "User not found"
-        }), 404
-    return jsonify(user.serialize())
-
-@app.route('/user/<int:user_id>/favorites', methods=['GET'])
-def user_favorites_get(user_id):
-    favorite_query = Favorite.query.filter_by(user_id = user_id)
-    favorite_list = list(lambda fav : fav.serialize(), favorite_query)
-    return jsonify(favorite_list)
-
 @app.route('/favorite/<string:element>/<int:element_id>', methods=['POST'])
 def favorite_create(element, element_id):
     user_id = request.get_json()["userId"]
@@ -80,12 +108,6 @@ def favorite_create(element, element_id):
     db.session.add(new_favorite)
     db.session.commit()
     return jsonify({"msg": "Favorite created"}), 201
-
-@app.route('/people', methods=['GET'])
-def people_get():
-    people = People.query.all()
-    people = list(map(lambda p : p.serialize(), people))
-    return jsonify(people)
 
 @app.route('/favorite/>string:element>/<int:element_id>', methods=['DELETE'])
 def favorite_planet_delete(element, element_id):
