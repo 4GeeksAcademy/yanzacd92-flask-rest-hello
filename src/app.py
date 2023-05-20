@@ -37,7 +37,7 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/user', methods=['GET'])
-def user_get():
+def users_get():
     user = User.query.all()
     user = list(map(lambda u : u.serialize(), user))
     return jsonify(user)
@@ -70,7 +70,7 @@ def user_get(user_id):
     return jsonify(user.serialize())
 
 @app.route('/people/<int:people_id>', methods=['GET'])
-def people_get(people_id):
+def person_get(people_id):
     person = People.query.get(people_id)
     if(person is None):
         return jsonify({
@@ -79,7 +79,7 @@ def people_get(people_id):
     return jsonify(person.serialize())
 
 @app.route('/planets/<int:planet_id>', methods=['GET'])
-def planets_get(planet_id):
+def planet_get(planet_id):
     planet = Planets.query.get(planet_id)
     if(planet is None):
         return jsonify({
