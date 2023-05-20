@@ -9,10 +9,18 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Favorite, People, Planets
+from flask_jwt_extended import JWTManager
+from flask_bcrypt import Bcrypt
 #from models import Person
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+
+bcrypt = Bcrypt(app)
+
+#JWTManager Configuration
+app.config["JWT_SECRET_KEY"] = os.getenv("FLASK_APP_KEY")
+jwt = JWTManager(app)
 
 db_url = os.getenv("DATABASE_URL")
 if db_url is not None:
@@ -88,7 +96,7 @@ def planet_get(planet_id):
     return jsonify(planet.serialize())
 
 
-@app.route('/user', methods=['POST'])
+@app.route('/signup', methods=['POST'])
 def user_create():
     data = request.get_json()
     new_user = User.query.filter_by(email=data["email"]).first()
@@ -96,7 +104,9 @@ def user_create():
         return jsonify({
             "msg": "Email registrado"
         }), 400
-    new_user = User(email=data["email"], password=data["password"], is_active=True)
+
+    password_decoded = bcrypt.generate_password_hash(data["password"], rounds=None).decode("utf-8")
+    new_user = User(email=data["email"], password=password_decoded, is_active=True)
     db.session.add(new_user)
     db.session.commit()
     return "ok"
