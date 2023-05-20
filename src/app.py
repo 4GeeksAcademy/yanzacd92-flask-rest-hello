@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Favorite
+from models import db, User, Favorite, People
 #from models import Person
 
 app = Flask(__name__)
@@ -67,13 +67,25 @@ def user_get(user_id):
         }), 404
     return jsonify(user.serialize())
 
-@app.route('/favorite/<element>/<int:element_id>', methods=['POST'])
+@app.route('/user/<int:user_id>/favorites', methods=['GET'])
+def user_favorites_get(user_id):
+    favorite_query = Favorite.query.filter_by(user_id = user_id)
+    favorite_list = list(lambda fav : fav.serialize(), favorite_query)
+    return jsonify(favorite_list)
+
+@app.route('/favorite/<string:element>/<int:element_id>', methods=['POST'])
 def favorite_create(element, element_id):
     user_id = request.get_json()["userId"]
     new_favorite = Favorite(type=element, element_id=element_id, user_id=user_id)
     db.session.add(new_favorite)
     db.session.commit()
     return jsonify({"msg": "Favorite created"}), 201
+
+@app.route('/people', methods=['GET'])
+def people_get():
+    people = People.query.all()
+    people = list(map(lambda p : p.serialize(), people))
+    return jsonify(people)
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':

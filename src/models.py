@@ -48,7 +48,9 @@ class People(db.Model):
             "height": self.height,
             "mass": self.mass,
             "name": self.name,
-            "skin_color": self.skin_color
+            "skin_color": self.skin_color,
+            "homeworld_id": self.homeworld_id,
+            "homeworld_name": self.homeworld.name,
             # do not serialize the password, its a security breach
         }
 
@@ -98,3 +100,14 @@ class Favorite(db.Model):
     user = db.relationship(User)
     #people = db.relationship(People)
     #planet = db.relationship(Planets)
+
+    def __repr__(self):
+        return '<Favorite %r>' % self.type % self.element_id
+
+    def serialize(self):
+        return {
+            "type": self.type,
+            "element_id": self.element_id,
+            "user_info": self.user.serialize()
+            # do not serialize the password, its a security breach
+        }
